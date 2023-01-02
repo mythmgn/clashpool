@@ -1,0 +1,13 @@
+[global]
+port = 9005
+# timeout in seconds for fetching web things
+timeout = 3
+
+[proxies]
+# remove expired proxies when <expire-days> passes by 
+expire-days = 7
+sites = [
+        {       proxy = "nodefree.org", url = "{{date('https://xxx.org/dy/%Y%m/%Y%m%d')}}.yaml}",
+        # {       proxy = "v2rayshare", url = "{{date(https://yyy.com/wp-content/uploads/%Y/%m/%Y%m%d.yaml}}" },
+        {       proxy = "clashnode", url = "{{date(https://zzz.com/wp-content/uploads/{{date:%y/%m/%y%m%d.yaml}}" }
+]
