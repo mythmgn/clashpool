@@ -1,3 +1,5 @@
 cup
 pyyaml
 requests
+Jinja2
+flask

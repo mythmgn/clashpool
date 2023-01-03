@@ -21,7 +21,7 @@ class UrlConfigProvider:
         """
         """
         self._name = name
-        self._url = func.func_handle(url)
+        self._url = url
         self._expire_days = expire_days
         self._proxies = None
         self._urltimeout = urltimeout
@@ -65,4 +65,5 @@ class UrlConfigProvider:
             except ValueError:
                 log.warn('ignore the proxy, continue')
         return proxies
+
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent
