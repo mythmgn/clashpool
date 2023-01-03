@@ -7,7 +7,7 @@ timeout = 3
 # remove expired proxies when <expire-days> passes by 
 expire-days = 7
 sites = [
-        {       proxy = "nodefree.org", url = "{%date('https://xxx.org/dy/%Y%m/%Y%m%d').yaml%}",
+        {       proxy = "nodefree", url = "{{date('https://xxx.org/dy/%Y%m/%Y%m%d')}}.yaml}",
         # {       proxy = "v2rayshare", url = "{{date(https://yyy.com/wp-content/uploads/%Y/%m/%Y%m%d.yaml}}" },
         {       proxy = "clashnode", url = "{%date(https://zzz.com/wp-content/uploads/%y/%m/%y%m%d.yaml%}"}
 ]
