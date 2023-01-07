@@ -1,6 +1,10 @@
-src/cscope.files
-src/cscope.in.out
-src/cscope.out
-src/cscope.po.out
-src/tags
+cscope.files
+cscope.in.out
+cscope.out
+cscope.po.out
+tags
+__pycache__
 *.bak
+*.lock
+
+

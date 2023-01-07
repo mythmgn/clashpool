@@ -12,27 +12,11 @@ import datetime
 from cup import decorators
 
 
-class BaseFunc(abc.ABC):
-    """
-    Abstract class:BaseFunc
-    """
-
-    @abc.abstractmethod
-    def functional(self, inputstring):
-        """functional string"""
-
-
-class Date(BaseFunc):
+def date_current(inputstring):
     """
     input with a string and replace {%date:YYYY/MM/DD%} with real time
     """
-
-    def functional(self, inputstring):
-        """
-        :return:
-            return the specified format for inputstring
-        """
-        return datetime.datetime.today().strftime(inputstring)
+    return datetime.datetime.today().strftime(inputstring)
 
 
 @decorators.Singleton
@@ -41,7 +25,7 @@ class Func2JinjaMappings:
     _MAPPINGS = {}
 
     def __init__(self):
-        Func2JinjaMappings.add_func('date', Date.functional)
+        self.add_func('date_current', date_current)
 
     @classmethod
     def add_func(cls, name, func):

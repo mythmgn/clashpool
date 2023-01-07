@@ -49,7 +49,7 @@ class ClashProxy:
             if key not in kvs:
                 raise ValueError('{0} not set'.format(key))
 
-    def get_ctime(self):
+    def ctime(self):
         """
         return date
         """

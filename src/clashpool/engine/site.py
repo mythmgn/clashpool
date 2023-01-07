@@ -38,7 +38,7 @@ class UrlConfigProvider:
         log.info(
             'to fetch UrlConfigProvider {0} for {1}'.format(
                 self._name, self._url))
-        req = requests.get(self._url, timeout=3)
+        req = requests.get(self._url, timeout=self._urltimeout)
         if req.status_code != 200:
             # pylint: disable= too-few-public-methods
             log.warn('UrlConfigProvider {} fetch url fail'.format(self._name))

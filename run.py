@@ -6,13 +6,12 @@
 :description:
 
 """
-import flask
+from clashpool.engine import pool
 
 
-class HttpServer(object):
-    """
-    """
-
+man = pool.PoolManager('./conf/clashpool.toml', 100)
+man.start()
 
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent
+
