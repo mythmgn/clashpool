@@ -6,17 +6,20 @@
 :description:
 
 """
-# pylint: disable=unused-import too-few-public-methods deprecated-method
+# pylint: disable=unused-import too-few-public-methods
+# pylint: disable=deprecated-method,too-many-instance-attributes
 # import datetime
 import os
 import time
 import copy
 import queue
-try:
-    # pylint disable: W05
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
+import tomlkit
+from tomlkit import exceptions
+# try:
+#     # pylint disable: W05
+#     import tomllib
+# except ModuleNotFoundError:
+#     import tomli as tomllib
 
 
 import jinja2
@@ -31,6 +34,8 @@ from clashpool.engine import proxy
 
 class PoolManager:
     """clash pool manager"""
+    EXPIRE_DAYS = 4
+
     def __init__(self, confloc : str, max_proxy_count: int = 1000):
         """
         pool manager
@@ -47,6 +52,7 @@ class PoolManager:
         self._stop_sign = False
         self._conf_toml = None
         self._yamlkvs = {}
+        self._max_proxycount = max_proxy_count
 
     def _refresh_conf_with_jinjafunc(self):
         """
@@ -54,31 +60,62 @@ class PoolManager:
         """
         tmpldir = os.path.dirname(self._confloc)
         tmplname = os.path.basename(self._confloc)
-        env = jinja2.Environment(loader=FileSystemLoader(tmpldir))
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(tmpldir))
         jinjatempl = env.get_template(tmplname)
         jinjatempl.globals.update(func.Func2JinjaMappings.mappings())
-        tmplstring = jinja_template.render()
+        tmplstring = jinjatempl.render()
         try:
-            tmp_confdict = tomllib.loads(tmplstring)
+            tmp_confdict = tomlkit.loads(tmplstring)
             self._conf_toml = tmp_confdict
-        except tomllib.TOMLDecodeError as err:
+        except exceptions.ParseError as err:
             log.warning(f'to toml conf failed:{self._confloc} {err}')
 
-    def stop(self, delay_time: int = 2):
+    def stop(self):
         """
         stop the manager after delay_time
         """
         self._stop_sign = True
+        log.info('to stop the clash pool')
 
-    def start(self, threadmax=4):
+    def needstop(self):
+        """
+        check if need stop
+        """
+        return self._stop_sign
+
+    # def start(self, threadmax=4):
+    def start(self):
         """start the pool"""
-        while not self._stop_sign:
+        while not self.needstop():
             self._refresh_conf_with_jinjafunc()
+            self._proc_sites()
 
-    def proc_sites(self, sitesinfo):
+    def _proc_sites(self):
         """
         proc sites
         """
+        if self.needstop():
+            log.info('need stop, proc site return')
+            return
+        if self._conf_toml is None:
+            log.error('cannot proc sites as toml parsing failed')
+            self.stop()
+            return
+        for single in self._conf_toml['proxies']['sites']:
+            siteobj = site.UrlConfigProvider(
+                single['name'], PoolManager.EXPIRE_DAYS, single['url'],
+                self._conf_toml['global']['timeout']
+            )
+            proxies = siteobj.fetch_proxies()
+        for pro in proxies:
+            uid = pro.unique_id()
+            if uid in self._proxies:
+                self._proxies[uid].refresh_expiration()
+
+        self._handle_expired()
+
+    def _handle_expired(self):
+        """remove expired proxies from the queue"""
 
     def _make_unique(self):
         """

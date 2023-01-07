@@ -11,7 +11,6 @@ import yaml
 from cup import log
 
 from clashpool.engine import proxy
-from clashpool.engine import func
 
 class UrlConfigProvider:
     """

@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "clashpool"
+version = "0.1.0"
+description = "For providing live clash pools with proxies inside"
+authors = ["Guannan Ma"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+cup = "^3.2"
+tomlkit = "^0.11.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -7,10 +7,9 @@
     Use Jinja2 to handle function mappings
 """
 import abc
-import jinja2
 import datetime
 
-from cup import decorations
+from cup import decorators
 
 
 class BaseFunc(abc.ABC):
@@ -28,8 +27,7 @@ class Date(BaseFunc):
     input with a string and replace {%date:YYYY/MM/DD%} with real time
     """
 
-    @classmethod
-    def functional(inputstring):
+    def functional(self, inputstring):
         """
         :return:
             return the specified format for inputstring
@@ -37,25 +35,27 @@ class Date(BaseFunc):
         return datetime.datetime.today().strftime(inputstring)
 
 
-@decorations.Singleton
+@decorators.Singleton
 class Func2JinjaMappings:
+    """function 2 jinja2 mappings"""
     _MAPPINGS = {}
 
     def __init__(self):
         Func2JinjaMappings.add_func('date', Date.functional)
 
     @classmethod
-    def add_func(name, func):
+    def add_func(cls, name, func):
         """
         add func for this
         """
         if not callable(func):
             raise ValueError('func not callable {}'.format(func))
-        _MAPPINGS[func.func_name] = func
+        cls._MAPPINGS[name] = func
 
     @classmethod
-    def mappings() -> list:
-        return _MAPPINGS
+    def mappings(cls) -> dict:
+        """return func mappings"""
+        return cls._MAPPINGS
 
 
 # def func_handle(inputstring):
