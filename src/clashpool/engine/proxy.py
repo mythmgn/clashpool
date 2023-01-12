@@ -39,6 +39,7 @@ class ClashProxy:
         self._info = '{0}(type {1}, service {2}'.format(
             self._name, self._type, self._uniqid
         )
+        self._kvs = yaml_kvs
 
     @staticmethod
     def check_valid_serverstring(kvs):
@@ -79,6 +80,10 @@ class ClashProxy:
     def info(self):
         """string info of the server"""
         return self._info
+
+    def attrs(self):
+        """return attrs in kv"""
+        return self._kvs
 
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

@@ -3,3 +3,4 @@ pyyaml
 requests
 Jinja2
 flask
+waitress

@@ -16,12 +16,12 @@ class UrlConfigProvider:
     """
     Clash Config(config.yaml) Provider which can be fetched by url.
     """
-    def __init__(self, name: str, expire_days: int, url: str, urltimeout: int):
+    def __init__(self, name: str, expire_secs: int, url: str, urltimeout: int):
         """
         """
         self._name = name
         self._url = url
-        self._expire_days = expire_days
+        self._expire_secs = expire_secs
         self._proxies = None
         self._urltimeout = urltimeout
 
@@ -38,14 +38,18 @@ class UrlConfigProvider:
         log.info(
             'to fetch UrlConfigProvider {0} for {1}'.format(
                 self._name, self._url))
-        req = requests.get(self._url, timeout=self._urltimeout)
+        try:
+            req = requests.get(self._url, timeout=self._urltimeout)
+        except requests.RequestException as errinfo:
+            log.warn(f'failed to get url site {self._url} {errinfo}, return')
+            return []
         if req.status_code != 200:
             # pylint: disable= too-few-public-methods
             log.warn('UrlConfigProvider {} fetch url fail'.format(self._name))
             return None
         kvs = None
         try:
-            kvs = yaml.load(req.content.decode(), Loader=yaml.BaseLoader)
+            kvs = yaml.load(req.content.decode(), Loader=yaml.FullLoader)
         # pylint: disable=broad-except
         except Exception as err:
             log.warn('UrlConfigProvider {0} failed to parse {1}: {2}'.format(
@@ -60,7 +64,15 @@ class UrlConfigProvider:
         proxies = []
         for tmp in tmplist:
             try:
-                proxies.append(proxy.ClashProxy(tmp))
+                pro = proxy.ClashProxy(tmp)
+                if any([
+                    pro.name().find('CN') >= 0,
+                    pro.name().find('中国') >=0
+                ]):
+                    log.info(f'skip proxy back to china line {pro.name()}')
+                    continue
+                proxies.append(pro)
+                log.info(f'proxy({pro.info()}) added')
             except ValueError:
                 log.warn('ignore the proxy, continue')
         return proxies

@@ -13,31 +13,28 @@ import os
 import time
 import copy
 import queue
+import collections
+
 import tomlkit
 from tomlkit import exceptions
-# try:
-#     # pylint disable: W05
-#     import tomllib
-# except ModuleNotFoundError:
-#     import tomli as tomllib
-
-
 import jinja2
 import yaml
 import requests
 from cup import log
+from cup import decorators
 
 from clashpool.engine import func
 from clashpool.engine import site
 from clashpool.engine import proxy
 
 
+@decorators.Singleton
 class PoolManager:
     """clash pool manager"""
     EXPIRE_DAYS = 4
     EXPIRE_SECONDS = EXPIRE_DAYS * 24 * 3600
 
-    def __init__(self, confloc : str, max_proxy_count: int = 1000):
+    def __init__(self, confloc: str, max_proxy_count: int = 1000):
         """
         pool manager
 
@@ -47,13 +44,20 @@ class PoolManager:
         if not os.path.exists(confloc):
             raise IOError('conf not exist({})'.format(confloc))
         self._confloc = confloc
-        self._proxies = {}
+        self._proxies = collections.OrderedDict()
         self._sortqueue = queue.PriorityQueue(max_proxy_count)
         self._sites = []
         self._stop_sign = False
+        self._running = False
         self._conf_toml = None
         self._yamlkvs = {}
         self._max_proxycount = max_proxy_count
+        self._refresh_conf_with_jinjafunc()
+        log.init_comlog(
+            'clashpool',
+            logfile=f"{self._conf_toml['global']['workdir']}/log/clashpool.log"
+        )
+        self._running = True
 
     def _refresh_conf_with_jinjafunc(self):
         """
@@ -71,6 +75,10 @@ class PoolManager:
         except exceptions.ParseError as err:
             log.warning(f'to toml conf failed:{self._confloc} {err}')
 
+    def running(self):
+        """is running"""
+        return self._running
+
     def stop(self):
         """
         stop the manager after delay_time
@@ -84,14 +92,13 @@ class PoolManager:
         """
         return self._stop_sign
 
-    # def start(self, threadmax=4):
-    def start(self):
+    def serve(self):
         """start the pool"""
         while not self.needstop():
             self._refresh_conf_with_jinjafunc()
             self._proc_sites()
-            time.sleep(3)
-            print(self.proxies())
+            time.sleep(self._conf_toml['proxies']['fetch-interval'])
+        self._running = False
 
     def _proc_sites(self):
         """
@@ -106,8 +113,8 @@ class PoolManager:
             return
         for single in self._conf_toml['proxies']['sites']:
             siteobj = site.UrlConfigProvider(
-                single['name'], PoolManager.EXPIRE_DAYS, single['url'],
-                self._conf_toml['global']['timeout']
+                single['name'], self.EXPIRE_SECONDS, single['url'],
+                self._conf_toml['proxies']['url-timeout']
             )
             proxies = siteobj.fetch_proxies()
         for pro in proxies:
@@ -116,27 +123,40 @@ class PoolManager:
                 self._proxies[uid].refresh_expiration()
             else:
                 self._proxies[uid] = pro
+                self._sortqueue.put((pro.ctime(), pro))
         self._handle_expired()
 
     def _handle_expired(self):
         """remove expired proxies from the queue"""
-        ctime = None
+        log.info('to check if the proxies have expired')
         item = None
         while not self._sortqueue.empty():
             try:
-                ctime, item = self._sortqueue.get_nowait()
+                _, item = self._sortqueue.get_nowait()
             except queue.Empty as errinfo:
                 log.info('no proxy available yet, no need handle expiration')
                 break
-            if (item.ctime() - time.time()) > PoolManager.EXPIRE_SECONDS:
+            if (time.time() - item.ctime()) > self.EXPIRE_SECONDS:
                 log.warning(f'proxy expired, to remove it {item.info}')
                 del self._proxies[item.unique_id()]
             else:
                 self._sortqueue.put((item.ctime(), item))
+                log.info(f'proxy not expired {item.info()}, return')
                 break
 
     def proxies(self):
         """get unique and valid procies"""
-        return self._proxies.items()
+        tmplist = []
+        for _, item in self._proxies.items():
+            tmplist.append(item)
+        return tmplist
+
+    def bindinfo(self):
+        """return bind info  (server: str, port: int)"""
+        return (
+            self._conf_toml['global']['server'],
+            self._conf_toml['global']['port']
+        )
+
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent
