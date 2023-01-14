@@ -9,6 +9,7 @@
 import time
 import yaml
 import collections
+import logging
 
 import flask
 from flask import request
@@ -17,6 +18,9 @@ from cup import thread
 from clashpool.engine import pool
 
 app = flask.Flask(__name__)
+logging.basicConfig()
+logger = logging.getLogger('waitress')
+logger.setLevel(logging.DEBUG)
 
 
 def appserve(confloc: str):

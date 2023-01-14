@@ -13,6 +13,7 @@ import os
 import time
 import copy
 import queue
+import logging
 import collections
 
 import tomlkit
@@ -20,12 +21,14 @@ from tomlkit import exceptions
 import jinja2
 import yaml
 import requests
+from flask import logging as flasklogging
 from cup import log
 from cup import decorators
 
 from clashpool.engine import func
 from clashpool.engine import site
 from clashpool.engine import proxy
+from clashpool import flaskser
 
 
 @decorators.Singleton
@@ -53,9 +56,12 @@ class PoolManager:
         self._yamlkvs = {}
         self._max_proxycount = max_proxy_count
         self._refresh_conf_with_jinjafunc()
+        global_kvs = self._conf_toml['global']
+        logger = logging.getLogger('waitress')
+        logger.setLevel(logging.DEBUG)
         log.init_comlog(
-            'clashpool',
-            logfile=f"{self._conf_toml['global']['workdir']}/log/clashpool.log"
+            'clashpool', loglevel=log.DEBUG,
+            logfile=f"{global_kvs['workdir']}/log/clashpool.log"
         )
         self._running = True
 

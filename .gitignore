@@ -1,3 +1,7 @@
+# folder
+dist/
+log/*.log*
+
 cscope.files
 cscope.in.out
 cscope.out
@@ -6,6 +10,4 @@ tags
 __pycache__
 *.bak
 *.lock
-
-
 nohup.out

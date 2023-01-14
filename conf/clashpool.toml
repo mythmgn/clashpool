@@ -3,8 +3,10 @@
 server = "0.0.0.0"
 port = 9005
 # timeout in seconds for fetching web things
+workdir = "/clashpool"
 
-workdir = "~/work/code/opensource/python/clashpool/"
+[global.waitress]
+logfile = "log/access.log"
 
 [proxies]
 url-timeout = 10
@@ -12,7 +14,7 @@ fetch-interval = 604800 # in seconds
 # remove expired proxies when <expire-days> passes by 
 expire-days = 7
 sites = [
-        {       name = "ste1", url = "{{date_current('https://xxxxx.org/dy/%Y/%m/%Y%m%d.yaml')}}" },
-        {       name = "site2", url = "{{date_current('https://xxxxx.com/wp-content/uploads/%Y/%m/%Y%m%d.yaml')}}" },
-        {       name = "site3", url = "{{date_current('https://xxxxx.eu.org/wp-content/uploads/rss/%Y%m%d.yml')}}" }
+        {       name = "nodefree", url = "{{date_current('https://nodefree.org/dy/%Y/%m/%Y%m%d.yaml')}}" },
+        {       name = "clashnode", url = "{{date_current('https://clashnode.com/wp-content/uploads/%Y/%m/%Y%m%d.yaml')}}" },
+        {       name = "clashfree", url = "{{date_current('https://clashfree.eu.org/wp-content/uploads/rss/%Y%m%d.yml')}}" }
 ]

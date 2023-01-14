@@ -3,14 +3,16 @@ name = "clashpool"
 version = "0.1.0"
 description = "For providing live clash pools with proxies inside"
 authors = ["Guannan Ma"]
+maintainers = ["Guannan Ma"]
 license = "Apache-2.0"
 readme = "README.md"
 classifiers = [
-    "Topic :: Software Development :: Build Tools",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers"
 ]
 packages = [
-    { include = "src/clashpool" },
+    { include = "clashpool", from = "src"},
 ]
 
 include = ["conf", "log"]
