@@ -12,3 +12,4 @@ __pycache__
 *.lock
 nohup.out
 clashpool.code-workspace
+examples/clashpool.toml
