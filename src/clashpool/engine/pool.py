@@ -123,13 +123,13 @@ class PoolManager:
                 self._conf_toml['proxies']['url-timeout']
             )
             proxies = siteobj.fetch_proxies()
-        for pro in proxies:
-            uid = pro.unique_id()
-            if uid in self._proxies:
-                self._proxies[uid].refresh_expiration()
-            else:
-                self._proxies[uid] = pro
-                self._sortqueue.put((pro.ctime(), pro))
+            for pro in proxies:
+                uid = pro.unique_id()
+                if uid in self._proxies:
+                    self._proxies[uid].refresh_expiration()
+                else:
+                    self._proxies[uid] = pro
+                    self._sortqueue.put((pro.ctime(), pro))
         self._handle_expired()
 
     def _handle_expired(self):
