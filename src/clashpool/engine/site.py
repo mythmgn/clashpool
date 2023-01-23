@@ -43,7 +43,7 @@ class UrlConfigProvider:
             return []
         if req.status_code != 200:
             # pylint: disable= too-few-public-methods
-            log.warn(f'UrlConfigProvider {self._name} fetch url fail')
+            log.warn(f'UrlConfigProvider {self._name} fetch url fail, return')
             return []
         kvs = None
         decode_info = req.content.decode().replace('!', 'WRONG_LINE_REPLACED')
@@ -62,8 +62,9 @@ class UrlConfigProvider:
         tmplist = kvs.get('proxies')
         if tmplist is None:
             log.warn(
-                f'UrlConfigProvider {self._name} no proxies found'
+                f'UrlConfigProvider {self._name} no proxies found, return'
             )
+            return []
         proxies = []
         for tmp in tmplist:
             try:
@@ -78,6 +79,7 @@ class UrlConfigProvider:
                 log.info(f'proxy({pro.info()}) added')
             except ValueError:
                 log.warn('ignore the proxy, continue')
+        log.info(f'fetch proxy for site {self._name} done')
         return proxies
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

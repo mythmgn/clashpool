@@ -33,12 +33,8 @@ class ClashProxy:
         self._time = time.time()
         self._name = self._attrs['name']
         self._type = self._attrs['type']
-        self._uniqid = '{0}:{1}'.format(
-            self._attrs['server'], self._attrs['port']
-        )
-        self._info = '{0}(type {1}, service {2}'.format(
-            self._name, self._type, self._uniqid
-        )
+        self._uniqid = f'{self._attrs["server"]}:{self._attrs["port"]}'
+        self._info = f'{self._name}(type {self._type}, service {self._uniqid}'
         self._kvs = yaml_kvs
 
     @staticmethod
@@ -48,7 +44,7 @@ class ClashProxy:
         """
         for key in ClashProxy._REQUIRE_SER_KEYS:
             if key not in kvs:
-                raise ValueError('{0} not set'.format(key))
+                raise ValueError(f'{key} not set')
 
     def ctime(self):
         """
@@ -68,7 +64,7 @@ class ClashProxy:
         """
         self._time = time.time()
         log.info(
-            'expiration refresh {0}:{1}'.format(self.name(), self.unique_id())
+            f'expiration refresh {self._name}:{self._uniqid}'
         )
 
     def unique_id(self):

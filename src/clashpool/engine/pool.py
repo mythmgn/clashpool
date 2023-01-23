@@ -102,9 +102,11 @@ class PoolManager:
         """start the pool"""
         wait_time = self._conf_toml['proxies']['fetch-interval']
         while not self.needstop():
+            log.info('to refresh configuration file')
             self._refresh_conf_with_jinjafunc()
+            log.info('to proc sites')
             self._proc_sites()
-            log.info(f'to wait for {wait_time}')
+            log.info(f'to wait for {wait_time} until another round come')
             time.sleep(wait_time)
             log.info('another proxy fetch is coming')
         self._running = False

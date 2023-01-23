@@ -6,7 +6,7 @@
 :description:
     Use Jinja2 to handle function mappings
 """
-import abc
+# import abc
 import datetime
 
 from cup import decorators
@@ -33,7 +33,7 @@ class Func2JinjaMappings:
         add func for this
         """
         if not callable(func):
-            raise ValueError('func not callable {}'.format(func))
+            raise ValueError(f'func not callable {func}')
         cls._MAPPINGS[name] = func
 
     @classmethod
