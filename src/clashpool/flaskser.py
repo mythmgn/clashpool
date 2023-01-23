@@ -7,12 +7,12 @@
     flask http server
 """
 import time
-import yaml
-import collections
 import logging
 
+
+import yaml
+# import collections
 import flask
-from flask import request
 import waitress
 from cup import thread
 from clashpool.engine import pool

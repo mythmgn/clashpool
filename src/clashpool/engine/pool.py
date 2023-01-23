@@ -4,7 +4,7 @@
 # Authors: Guannan Ma (@mythmgn),
 """
 :description:
-
+    fetching pool for getting proxies
 """
 # pylint: disable=unused-import too-few-public-methods
 # pylint: disable=deprecated-method,too-many-instance-attributes
@@ -45,7 +45,7 @@ class PoolManager:
             IOError if confloc not exist
         """
         if not os.path.exists(confloc):
-            raise IOError('conf not exist({})'.format(confloc))
+            raise IOError(f'conf not exist({confloc})')
         self._confloc = confloc
         self._proxies = collections.OrderedDict()
         self._sortqueue = queue.PriorityQueue(max_proxy_count)
@@ -100,10 +100,13 @@ class PoolManager:
 
     def serve(self):
         """start the pool"""
+        wait_time = self._conf_toml['proxies']['fetch-interval']
         while not self.needstop():
             self._refresh_conf_with_jinjafunc()
             self._proc_sites()
-            time.sleep(self._conf_toml['proxies']['fetch-interval'])
+            log.info(f'to wait for {wait_time}')
+            time.sleep(wait_time)
+            log.info('another proxy fetch is coming')
         self._running = False
 
     def _proc_sites(self):
@@ -139,7 +142,7 @@ class PoolManager:
         while not self._sortqueue.empty():
             try:
                 _, item = self._sortqueue.get_nowait()
-            except queue.Empty as errinfo:
+            except queue.Empty:
                 log.info('no proxy available yet, no need handle expiration')
                 break
             if (time.time() - item.ctime()) > self.EXPIRE_SECONDS:

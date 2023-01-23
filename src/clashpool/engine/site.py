@@ -6,8 +6,8 @@
 :description:
 
 """
-import requests
 import yaml
+import requests
 from cup import log
 
 from clashpool.engine import proxy
@@ -35,9 +35,7 @@ class UrlConfigProvider:
         # if it's None, will try fetch again
         if self._proxies is not None:
             return self._proxies
-        log.info(
-            'to fetch UrlConfigProvider {0} for {1}'.format(
-                self._name, self._url))
+        log.info(f'to fetch UrlConfigProvider {self._name} for {self._url}')
         try:
             req = requests.get(self._url, timeout=self._urltimeout)
         except requests.RequestException as errinfo:
@@ -45,21 +43,26 @@ class UrlConfigProvider:
             return []
         if req.status_code != 200:
             # pylint: disable= too-few-public-methods
-            log.warn('UrlConfigProvider {} fetch url fail'.format(self._name))
-            return None
+            log.warn(f'UrlConfigProvider {self._name} fetch url fail')
+            return []
         kvs = None
+        decode_info = req.content.decode().replace('!', 'WRONG_LINE_REPLACED')
+        decode_info = decode_info.replace('<str>', 'WRONG_LINE_REPLACED')
         try:
-            kvs = yaml.load(req.content.decode(), Loader=yaml.FullLoader)
+            kvs = yaml.load(decode_info, Loader=yaml.FullLoader)
+            if not isinstance(kvs, dict):
+                return []
         # pylint: disable=broad-except
-        except Exception as err:
-            log.warn('UrlConfigProvider {0} failed to parse {1}: {2}'.format(
-                self._name, self._url, err
-            ))
-            return None
+        except Exception:
+            log.warn(
+                f'UrlConfigProvider {self._name} failed to '
+                'parse {self._url}: {err}'
+            )
+            return []
         tmplist = kvs.get('proxies')
         if tmplist is None:
             log.warn(
-                'UrlConfigProvider {0} no proxies found'.format(self._name)
+                f'UrlConfigProvider {self._name} no proxies found'
             )
         proxies = []
         for tmp in tmplist:
